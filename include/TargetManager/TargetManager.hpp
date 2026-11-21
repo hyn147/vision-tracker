@@ -14,6 +14,7 @@ class TrackingBase //基类
 {
 public:
     bool isDelete = false;
+    bool isChange = false;
     TrackingBase(int id, TargetType type, double x, double y, std::int64_t timestamp_ns);
     virtual ~TrackingBase();
     int get_id() const noexcept;
