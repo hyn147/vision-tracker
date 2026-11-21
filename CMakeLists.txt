@@ -11,6 +11,7 @@ add_executable(tracker
   src/main.cpp
   include/data_types.hpp
   include/test_frames.hpp
+  src/TargetManager/TargetManager.cpp
 )
 
 target_include_directories(tracker PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
