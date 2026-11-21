@@ -13,6 +13,7 @@ namespace rm
 class TrackingBase //基类
 {
 public:
+    bool isDelete = false;
     TrackingBase(int id, TargetType type, double x, double y, std::int64_t timestamp_ns);
     virtual ~TrackingBase();
     int get_id() const noexcept;
@@ -29,6 +30,8 @@ public:
     void modify_y(double y);
     void modity_velocity_x(double velocity_x);
     void modity_velocity_y(double velocity_y);
+    int get_Del_count();
+    int get_LostCount();
     virtual int lostThreshold() const noexcept = 0; //判断为lost所需的数量
     virtual TargetSnapshot snapshot() const;
     virtual void updateNotFind(double frame_dt);
@@ -45,6 +48,8 @@ private:
     double m_predicted_y;
     int m_missed_count = 0;
     std::int64_t m_last_observed_timestamp_ns;
+    int LostCount = 0;
+    static constexpr int Del_count = 10;
 };
 
 class ArmorTarget final : public TrackingBase //普通装甲

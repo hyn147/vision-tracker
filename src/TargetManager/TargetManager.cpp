@@ -128,6 +128,15 @@ std::int64_t TrackingBase::get_last_observed_timestamp_ns() const noexcept
 {
     return m_last_observed_timestamp_ns;
 }
+int TrackingBase::get_Del_count()
+{
+    return Del_count;
+}
+int TrackingBase::get_LostCount()
+{
+    return LostCount;
+}
+
 //onFrame
 
 Result TargetManager::onFrame(const InputFrame& frame)
@@ -215,6 +224,12 @@ Result TargetManager::onFrame(const InputFrame& frame)
         }
 
     }
+    m_targets.erase(std::remove_if(m_targets.begin(),m_targets.end(),
+                    [](const std::unique_ptr<TrackingBase>& target)
+                {
+                    return target->isDelete;
+                }),m_targets.end());
+
     res.armor_target_count = 0;
     res.lost_target_count = 0;
     res.spinning_target_count = 0;
