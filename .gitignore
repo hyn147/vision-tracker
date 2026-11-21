@@ -1,2 +1,10 @@
 # Build outputs
 build/
+.vscode/
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+compile_commands.json
+tracker
+tempCodeRunnerFile*
