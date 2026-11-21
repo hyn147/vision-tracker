@@ -172,6 +172,22 @@ Result TargetManager::onFrame(const InputFrame& frame)
                 return res;
         }
     }
+    for(const auto& obs : frame.observations) //类型不一致
+    {
+        for(const auto& tar : m_targets)
+        {
+            if(tar->get_id() == obs.id && tar->get_type() != obs.type)
+            {
+                tar->isChange = true;
+            }
+        }
+    }
+    m_targets.erase(std::remove_if(m_targets.begin(),m_targets.end(),
+                [](const std::unique_ptr<TrackingBase>& target)
+            {
+                return target->isChange;
+            }),m_targets.end());
+
     double frame_dt = 0.0;
     if(m_has_successful_frame) //算时间差
     {
