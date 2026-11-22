@@ -82,7 +82,6 @@ public:
     TargetSnapshot snapshot() const override;
     void updateNotFind(double frame_dt) override;
     void updateFind(const Observation& observation,std::int64_t timestamp_ns,double frame_dt) override;
-    static constexpr int get_lostSpinning() noexcept { return lostSpinning; }
 private:
     double m_angle = 0.0;
     double m_angular_velocity = 0.0;
