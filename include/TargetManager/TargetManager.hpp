@@ -24,7 +24,7 @@ public:
     double get_y() const noexcept;
     std::int64_t get_last_observed_timestamp_ns() const noexcept;
 
-bool get_isDelete();
+    bool get_isDelete();
     bool get_isChange();
     void modify_isChange(bool a);
     void modify_isDelete(bool a);
@@ -55,7 +55,7 @@ private:
     std::int64_t m_last_observed_timestamp_ns;
     int LostCount = 0;
     static constexpr int Del_count = 10;
-bool isDelete = false;
+    bool isDelete = false;
     bool isChange = false;
 };
 
