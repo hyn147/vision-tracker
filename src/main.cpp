@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <iostream>
 
+#include "TargetManager/TargetManager.hpp"
 #include "data_types.hpp"
 #include "test_frames.hpp"
 
@@ -20,15 +21,15 @@ using rm::TargetStatus;
 //   2. main 不需要改动。
 // 开始时目标管理器内无目标；收到此前未创建过的编号时创建目标，main 不参与。
 
-class TargetManager
-{
-public:
-    Result onFrame(const InputFrame &frame)
-    {
-        // 占位行为：不做处理，返回"本帧未接受"
-        return Result{false, frame.frame_id, {}, 0, 0, 0, 0};
-    }
-};
+// class TargetManager
+// {
+// public:
+//     Result onFrame(const InputFrame &frame)
+    //     {
+//         // 占位行为：不做处理，返回"本帧未接受"
+//         return Result{false, frame.frame_id, {}, 0, 0, 0, 0};
+    //     }
+// };
 
 // 打印一个目标的信息
 void printTarget(const TargetSnapshot &target)
@@ -84,7 +85,7 @@ void printResult(const Result &result)
 
 int main()
 {
-    TargetManager target_manager;
+    rm::TargetManager target_manager;
 
     for (const auto &frame : testFrames())
     {
