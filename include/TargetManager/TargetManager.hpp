@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 namespace rm
 {
@@ -12,6 +13,8 @@ namespace rm
 class TrackingBase //基类
 {
 public:
+    //bool isDelete = false;
+    //bool isChange = false;
     TrackingBase(int id, TargetType type, double x, double y, std::int64_t timestamp_ns);
     virtual ~TrackingBase();
     int get_id() const noexcept;
@@ -21,14 +24,19 @@ public:
     double get_y() const noexcept;
     std::int64_t get_last_observed_timestamp_ns() const noexcept;
 
+    bool get_isDelete();
+    bool get_isChange();
+    void modify_isChange(bool a);
+    void modify_isDelete(bool a);
+    void modify_type(TargetType type);
     void modify_status(TargetStatus status);
     void modify_missed_count(int count);
     void modify_x(double x);
     void modify_y(double y);
     void modity_velocity_x(double velocity_x);
     void modity_velocity_y(double velocity_y);
-
-
+    int get_Del_count();
+    int get_LostCount();
     virtual int lostThreshold() const noexcept = 0; //判断为lost所需的数量
     virtual TargetSnapshot snapshot() const;
     virtual void updateNotFind(double frame_dt);
@@ -45,6 +53,10 @@ private:
     double m_predicted_y;
     int m_missed_count = 0;
     std::int64_t m_last_observed_timestamp_ns;
+    int LostCount = 0;
+    static constexpr int Del_count = 10;
+    bool isDelete = false;
+    bool isChange = false;
 };
 
 class ArmorTarget final : public TrackingBase //普通装甲
@@ -91,4 +103,4 @@ private:
     std::vector<std::unique_ptr<TrackingBase>> m_targets;//指针
 };
 
-} // namespace rm
+}

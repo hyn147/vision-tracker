@@ -17,6 +17,11 @@ TrackingBase::TrackingBase(int id, TargetType type, double x, double y, std::int
 
 TrackingBase::~TrackingBase() = default;
 
+void TrackingBase::modify_type(TargetType type)
+{
+    m_type = type;
+}
+
 void TrackingBase::modify_status(TargetStatus status)
 {
     m_status = status;
@@ -123,6 +128,30 @@ std::int64_t TrackingBase::get_last_observed_timestamp_ns() const noexcept
 {
     return m_last_observed_timestamp_ns;
 }
+int TrackingBase::get_Del_count()
+{
+    return Del_count;
+}
+int TrackingBase::get_LostCount()
+{
+    return LostCount;
+}
+bool TrackingBase::get_isDelete()
+{
+    return isDelete;
+}
+bool TrackingBase::get_isChange()
+{
+    return isChange;
+}
+void TrackingBase::modify_isChange(bool a)
+{
+    isChange = a;
+}
+void TrackingBase::modify_isDelete(bool a)
+{
+    isDelete = a;
+}
 
 //onFrame
 
@@ -142,7 +171,7 @@ Result TargetManager::onFrame(const InputFrame& frame)
         if(snapshot.type == TargetType::ARMOR)
             res.armor_target_count++;
         if(snapshot.type == TargetType::SPINNING)
-            res.spinning_target_count++;       
+            res.spinning_target_count++;
     }
     if(m_has_successful_frame && (frame.frame_id <= m_last_success_frame_id || frame.timestamp_ns <= m_last_success_timestamp_ns))
     return res;
@@ -164,13 +193,21 @@ Result TargetManager::onFrame(const InputFrame& frame)
         for(const auto& tar : m_targets)
         {
             if(tar->get_id() == obs.id && tar->get_type() != obs.type)
-                return res;
+            {
+                tar->modify_isChange(true);
+            }
         }
     }
+    m_targets.erase(std::remove_if(m_targets.begin(),m_targets.end(),
+                [](const std::unique_ptr<TrackingBase>& target)
+            {
+                return target->get_isChange();
+            }),m_targets.end());
+
     double frame_dt = 0.0;
     if(m_has_successful_frame) //算时间差
     {
-        frame_dt = 
+        frame_dt =
         (frame.timestamp_ns - m_last_success_timestamp_ns) * 1e-9;
     }
     for(const auto& obs : frame.observations) //遍历观测
@@ -191,7 +228,7 @@ Result TargetManager::onFrame(const InputFrame& frame)
             {
                 auto new_target = std::make_unique<ArmorTarget>(obs, frame.timestamp_ns);
                 m_targets.push_back(std::move(new_target));
-            }                
+            }
             if(obs.type == TargetType::SPINNING)
             {
                 auto new_target = std::make_unique<SpinningTarget>(obs, frame.timestamp_ns);
@@ -212,8 +249,18 @@ Result TargetManager::onFrame(const InputFrame& frame)
             }
         }
         if(!isfind2)
+        {
             target->updateNotFind(frame_dt);
+            if(target->get_Del_count() <= target->get_LostCount())
+                target->modify_isDelete(true);
+        }
+
     }
+    m_targets.erase(std::remove_if(m_targets.begin(),m_targets.end(),
+                    [](const std::unique_ptr<TrackingBase>& target)
+                {
+                    return target->get_isDelete();
+                }),m_targets.end());
 
     res.armor_target_count = 0;
     res.lost_target_count = 0;
@@ -232,7 +279,7 @@ Result TargetManager::onFrame(const InputFrame& frame)
         if(snapshot.type == TargetType::ARMOR)
             res.armor_target_count++;
         if(snapshot.type == TargetType::SPINNING)
-            res.spinning_target_count++; 
+            res.spinning_target_count++;
     }
     m_last_success_frame_id = frame.frame_id;
     m_last_success_timestamp_ns = frame.timestamp_ns;
@@ -258,8 +305,6 @@ TargetSnapshot TrackingBase::snapshot() const //基类
     result.angular_velocity = 0.0;
     result.predicted_angle = 0.0;
 
-
-    
     return result;
 }
 
@@ -283,6 +328,7 @@ void TrackingBase::updateFind(const Observation& observation,std::int64_t timest
         modify_y(y);
         modity_velocity_x(0.0);
         modity_velocity_y(0.0);
+        LostCount = 0;
     }
     m_status = TargetStatus::TRACK;
     m_x = observation.x;
@@ -315,8 +361,8 @@ void TrackingBase::updateNotFind(double dt)
         m_velocity_y = 0.0;
         m_predicted_x = 0.0;
         m_predicted_y = 0.0;
+        LostCount++;
     }
-
 }
 
 TargetSnapshot SpinningTarget::snapshot() const //旋转
