@@ -136,6 +136,22 @@ int TrackingBase::get_LostCount()
 {
     return LostCount;
 }
+bool TrackingBase::get_isDelete()
+{
+    return isDelete;
+}
+bool TrackingBase::get_isChange()
+{
+    return isChange;
+}
+void TrackingBase::modify_isChange(bool a)
+{
+    isChange = a;
+}
+void TrackingBase::modify_isDelete(bool a)
+{
+    isDelete = a;
+}
 
 //onFrame
 
@@ -178,14 +194,14 @@ Result TargetManager::onFrame(const InputFrame& frame)
         {
             if(tar->get_id() == obs.id && tar->get_type() != obs.type)
             {
-                tar->isChange = true;
+                tar->modify_isChange(true);
             }
         }
     }
     m_targets.erase(std::remove_if(m_targets.begin(),m_targets.end(),
                 [](const std::unique_ptr<TrackingBase>& target)
             {
-                return target->isChange;
+                return target->get_isChange();
             }),m_targets.end());
 
     double frame_dt = 0.0;
@@ -236,14 +252,14 @@ Result TargetManager::onFrame(const InputFrame& frame)
         {
             target->updateNotFind(frame_dt);
             if(target->get_Del_count() <= target->get_LostCount())
-                target->isDelete = true;
+                target->modify_isDelete(true);
         }
 
     }
     m_targets.erase(std::remove_if(m_targets.begin(),m_targets.end(),
                     [](const std::unique_ptr<TrackingBase>& target)
                 {
-                    return target->isDelete;
+                    return target->get_isDelete();
                 }),m_targets.end());
 
     res.armor_target_count = 0;
